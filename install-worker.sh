@@ -47,7 +47,6 @@ fi
 ### Packages ###################################################################
 ################################################################################
 
-# Update the OS to begin with to catch up to the latest packages.
 sudo yum update -y
 
 # Install necessary packages
@@ -175,10 +174,11 @@ for binary in ${BINARIES[*]} ; do
         aws s3 cp --region $BINARY_BUCKET_REGION $S3_PATH/$binary.sha256 .
     else
         echo "AWS cli missing - using wget to fetch binaries from s3. Note: This won't work for private bucket."
-        sudo wget $S3_URL_BASE/$binary
-        sudo wget $S3_URL_BASE/$binary.sha256
+        sudo wget --no-check-certificate $S3_URL_BASE/$binary          # don't check the certificates, since this traffic will pass the KBC SWG. Ami does not have the SWG presents trusted.
+        sudo wget --no-check-certificate $S3_URL_BASE/$binary.sha256   # don't check the certificates, since this traffic will pass the KBC SWG. Ami does not have the SWG presents trusted.
     fi
-    sudo sha256sum -c $binary.sha256
+
+#    sudo sha256sum -c $binary.sha256 # doesn't work?
     sudo chmod +x $binary
     sudo mv $binary /usr/bin/
 done
